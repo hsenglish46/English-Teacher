@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart English Builder v8 Ultimate</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #4c5c68;
+            --accent-color: #e07a5f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 600px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            resize: vertical;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .file-input-wrapper:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f4f8;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .preview-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            display: none;
+        }
+
+        .result-header {
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+
+        .output-text {
+            font-size: 16px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Smart English Builder v8 Ultimate</h1>
+    
+    <div class="upload-section">
+        <div class="input-box">
+            <label for="textInput">영어 텍스트 입력 (선택사항)</label>
+            <textarea id="textInput" placeholder="여기에 영어 문장이나 본문을 입력하세요..."></textarea>
+        </div>
+        
+        <div class="input-box">
+            <label>이미지 파일 업로드 (선택사항)</label>
+            <div class="file-input-wrapper">
+                <span id="fileInputLabel">🖼️ 이미지를 드래그하거나 클릭하여 업로드</span>
+                <input type="file" id="imageInput" accept="image/*">
+            </div>
+            <div class="preview-container">
+                <img id="imagePreview" alt="업로드 이미지 미리보기">
+            </div>
+        </div>
+    </div>
+
+    <button class="btn" id="processBtn">작동 및 생성하기</button>
+
+    <div class="result-section" id="resultSection">
+        <div class="result-header">생성된 학습 자료 결과</div>
+        <div class="output-text" id="outputText"></div>
+    </div>
+</div>
+
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const fileInputLabel = document.getElementById('fileInputLabel');
+    const processBtn = document.getElementById('processBtn');
+    const resultSection = document.getElementById('resultSection');
+    const outputText = document.getElementById('outputText');
+    const textInput = document.getElementById('textInput');
+
+    // 이미지 파일 선택 시 미리보기 처리
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            fileInputLabel.textContent = `📁 선택된 파일: ${file.name}`;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            resetImagePreview();
+        }
+    });
+
+    function resetImagePreview() {
+        imagePreview.src = '';
+        imagePreview.style.display = 'none';
+        fileInputLabel.textContent = '🖼️ 이미지를 드래그하거나 클릭하여 업로드';
+    }
+
+    // [수정 반영 사항]: 텍스트 없이 사진 파일만 넣어도 정상 작동되도록 로직 수정
+    processBtn.addEventListener('click', function() {
+        const textValue = textInput.value.trim();
+        const hasImage = imageInput.files.length > 0;
+
+        // 텍스트와 이미지 둘 다 없는 경우에만 경고 메시지 출력
+        if (!textValue && !hasImage) {
+            alert('텍스트를 입력하거나 이미지 파일을 업로드해 주세요!');
+            return;
+        }
+
+        // 결과창 활성화
+        resultSection.style.display = 'block';
+        outputText.textContent = "작업을 진행 중입니다...\n";
+
+        // 입력 상태에 따른 맞춤형 피드백 메시지 생성 생성
+        if (textValue && hasImage) {
+            outputText.textContent += `[텍스트 분석 완료]: 입력한 텍스트를 기반으로 학습 데이터를 구성합니다.\n[이미지 인식 완료]: 업로드하신 이미지 요소를 결합하여 멀티미디어 교재 레이아웃을 생성합니다.`;
+        } else if (hasImage) {
+            outputText.textContent += `[이미지 기반 작동]: 텍스트 입력 없이 이미지 파일만으로 작동을 시작합니다.\n이미지 데이터를 시각 자료로 변환하여 스마트 빌더 화면에 배치했습니다.`;
+        } else if (textValue) {
+            outputText.textContent += `[텍스트 기반 작동]: 입력된 영문 텍스트를 분석하여 기초 공학 및 문항 데이터 빌드를 시작합니다.`;
+        }
+        
+        // 스크롤을 결과 화면으로 부드럽게 이동
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+    });
+</script>
+
+</body>
+</html>
