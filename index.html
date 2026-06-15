@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart English Builder v8 Ultimate</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root {
             --primary-color: #4a6fa5;
@@ -144,6 +145,11 @@
             background-color: var(--secondary-color);
         }
 
+        .btn:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
         .result-section {
             margin-top: 30px;
             padding: 20px;
@@ -167,98 +173,7 @@
             line-height: 1.6;
             white-space: pre-wrap;
         }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>Smart English Builder v8 Ultimate</h1>
-    
-    <div class="upload-section">
-        <div class="input-box">
-            <label for="textInput">영어 텍스트 입력 (선택사항)</label>
-            <textarea id="textInput" placeholder="여기에 영어 문장이나 본문을 입력하세요..."></textarea>
-        </div>
         
-        <div class="input-box">
-            <label>이미지 파일 업로드 (선택사항)</label>
-            <div class="file-input-wrapper">
-                <span id="fileInputLabel">🖼️ 이미지를 드래그하거나 클릭하여 업로드</span>
-                <input type="file" id="imageInput" accept="image/*">
-            </div>
-            <div class="preview-container">
-                <img id="imagePreview" alt="업로드 이미지 미리보기">
-            </div>
-        </div>
-    </div>
-
-    <button class="btn" id="processBtn">작동 및 생성하기</button>
-
-    <div class="result-section" id="resultSection">
-        <div class="result-header">생성된 학습 자료 결과</div>
-        <div class="output-text" id="outputText"></div>
-    </div>
-</div>
-
-<script>
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    const fileInputLabel = document.getElementById('fileInputLabel');
-    const processBtn = document.getElementById('processBtn');
-    const resultSection = document.getElementById('resultSection');
-    const outputText = document.getElementById('outputText');
-    const textInput = document.getElementById('textInput');
-
-    // 이미지 파일 선택 시 미리보기 처리
-    imageInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            fileInputLabel.textContent = `📁 선택된 파일: ${file.name}`;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        } else {
-            resetImagePreview();
-        }
-    });
-
-    function resetImagePreview() {
-        imagePreview.src = '';
-        imagePreview.style.display = 'none';
-        fileInputLabel.textContent = '🖼️ 이미지를 드래그하거나 클릭하여 업로드';
-    }
-
-    // [수정 반영 사항]: 텍스트 없이 사진 파일만 넣어도 정상 작동되도록 로직 수정
-    processBtn.addEventListener('click', function() {
-        const textValue = textInput.value.trim();
-        const hasImage = imageInput.files.length > 0;
-
-        // 텍스트와 이미지 둘 다 없는 경우에만 경고 메시지 출력
-        if (!textValue && !hasImage) {
-            alert('텍스트를 입력하거나 이미지 파일을 업로드해 주세요!');
-            return;
-        }
-
-        // 결과창 활성화
-        resultSection.style.display = 'block';
-        outputText.textContent = "작업을 진행 중입니다...\n";
-
-        // 입력 상태에 따른 맞춤형 피드백 메시지 생성 생성
-        if (textValue && hasImage) {
-            outputText.textContent += `[텍스트 분석 완료]: 입력한 텍스트를 기반으로 학습 데이터를 구성합니다.\n[이미지 인식 완료]: 업로드하신 이미지 요소를 결합하여 멀티미디어 교재 레이아웃을 생성합니다.`;
-        } else if (hasImage) {
-            outputText.textContent += `[이미지 기반 작동]: 텍스트 입력 없이 이미지 파일만으로 작동을 시작합니다.\n이미지 데이터를 시각 자료로 변환하여 스마트 빌더 화면에 배치했습니다.`;
-        } else if (textValue) {
-            outputText.textContent += `[텍스트 기반 작동]: 입력된 영문 텍스트를 분석하여 기초 공학 및 문항 데이터 빌드를 시작합니다.`;
-        }
-        
-        // 스크롤을 결과 화면으로 부드럽게 이동
-        resultSection.scrollIntoView({ behavior: 'smooth' });
-    });
-</script>
-
-</body>
-</html>
+        .word-list {
+            margin-top: 10px;
+            padding-left: 2
