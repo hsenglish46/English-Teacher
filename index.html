@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart English Builder v8 Ultimate</title>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
     <style>
         :root {
             --primary-color: #4a6fa5;
@@ -176,4 +176,145 @@
         
         .word-list {
             margin-top: 10px;
-            padding-left: 2
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Smart English Builder v8 Ultimate</h1>
+    
+    <div class="upload-section">
+        <div class="input-box">
+            <label for="textInput">영어 텍스트 입력 (선택사항)</label>
+            <textarea id="textInput" placeholder="여기에 영어 문장이나 본문을 입력하세요..."></textarea>
+        </div>
+        
+        <div class="input-box">
+            <label>이미지 파일 업로드 (선택사항)</label>
+            <div class="file-input-wrapper">
+                <span id="fileInputLabel">🖼️ 이미지를 드래그하거나 클릭하여 업로드</span>
+                <input type="file" id="imageInput" accept="image/*">
+            </div>
+            <div class="preview-container">
+                <img id="imagePreview" alt="업로드 이미지 미리보기">
+            </div>
+        </div>
+    </div>
+
+    <button class="btn" id="processBtn">작동 및 생성하기</button>
+
+    <div class="result-section" id="resultSection">
+        <div class="result-header">생성된 학습 자료 결과</div>
+        <div class="output-text" id="outputText"></div>
+    </div>
+</div>
+
+<script>
+    // 라이브러리 로드 실패 시 화면 먹통 방지용 안전장치
+    window.addEventListener('error', function(e) {
+        if (e.message.includes('Tesseract')) {
+            console.warn('Tesseract 라이브러리 로드 지연 또는 차단 발생. 대체 모드로 전환합니다.');
+        }
+    });
+
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const fileInputLabel = document.getElementById('fileInputLabel');
+    const processBtn = document.getElementById('processBtn');
+    const resultSection = document.getElementById('resultSection');
+    const outputText = document.getElementById('outputText');
+    const textInput = document.getElementById('textInput');
+
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            fileInputLabel.textContent = `📁 선택된 파일: ${file.name}`;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            resetImagePreview();
+        }
+    });
+
+    function resetImagePreview() {
+        imagePreview.src = '';
+        imagePreview.style.display = 'none';
+        fileInputLabel.textContent = '🖼️ 이미지를 드래그하거나 클릭하여 업로드';
+    }
+
+    processBtn.addEventListener('click', async function() {
+        const textValue = textInput.value.trim();
+        const hasImage = imageInput.files.length > 0;
+
+        if (!textValue && !hasImage) {
+            alert('텍스트를 입력하거나 이미지 파일을 업로드해 주세요!');
+            return;
+        }
+
+        resultSection.style.display = 'block';
+        processBtn.disabled = true;
+        processBtn.textContent = "분석 진행 중...";
+        outputText.innerHTML = "🔄 <strong>알림:</strong> 학습 자료를 구성하고 있습니다. 잠시만 기다려 주세요...<br>";
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+
+        let finalRawText = textValue;
+
+        if (hasImage) {
+            outputText.innerHTML += "📸 <strong>[이미지 분석 중]:</strong> 이미지에서 영어 텍스트를 추출하고 있습니다...<br>";
+            
+            // Tesseract 존재 여부 체크 후 동적 분석 진행
+            if (typeof Tesseract !== 'undefined') {
+                try {
+                    const imageFile = imageInput.files[0];
+                    // worker 옵션을 최소화하여 CORS/보안 환경 최적화 구조로 호출
+                    const result = await Tesseract.recognize(imageFile, 'eng', {
+                        corePath: 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js-core/4.0.1/tesseract-core.wasm.js'
+                    });
+                    const extractedText = result.data.text;
+                    
+                    if (extractedText.trim()) {
+                        outputText.innerHTML += "✅ <strong>[이미지 인식 완료]:</strong> 글자 추출에 성공했습니다.<br><br>";
+                        finalRawText += "\n" + extractedText;
+                    } else {
+                        outputText.innerHTML += "⚠️ <strong>[주의]:</strong> 이미지에서 선명한 텍스트를 찾지 못했습니다.<br><br>";
+                    }
+                } catch (error) {
+                    console.error(error);
+                    outputText.innerHTML += "❌ <strong>[보안 차단 안내]:</strong> 브라우저 보안 정책으로 이미지 분석 엔진이 차단되었습니다. 일반 텍스트만 처리합니다.<br><br>";
+                }
+            } else {
+                outputText.innerHTML += "⚠️ <strong>[엔진 미로드]:</strong> 분석 엔진 라이브러리가 차단되었습니다. 일반 입력 텍스트로 대체합니다.<br><br>";
+            }
+        }
+
+        // 단어 정제 및 화면 출력
+        const words = finalRawText.toLowerCase().match(/[a-zA-Z]+/g);
+        
+        if (words && words.length > 0) {
+            const uniqueWords = [...new Set(words)].sort();
+            let resultHTML = `<strong>📚 [추출된 단어 리스트 - 총 ${uniqueWords.length}개]</strong><br>`;
+            resultHTML += `<ul class="word-list">`;
+            uniqueWords.forEach(word => {
+                if(word.length > 1) {
+                    resultHTML += `<li>${word}</li>`;
+                }
+            });
+            resultHTML += `</ul>`;
+            outputText.innerHTML += resultHTML;
+        } else {
+            outputText.innerHTML += "❌ 분석할 수 있는 영어 단어가 발견되지 않았습니다.";
+        }
+
+        processBtn.disabled = false;
+        processBtn.textContent = "작동 및 생성하기";
+    });
+</script>
+
+</body>
+</html>
