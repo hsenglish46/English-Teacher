@@ -4,128 +4,79 @@ HTML
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>환영해요 영어해봅시다 - 메인 메뉴</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>English 클래스 메뉴판</title>
     <style>
-        /* 1. 전체 레이아웃 설정 (Theme_1: 학구적이고 authoritative한 느낌) */
-        :root {
-            --bg-color: #f3f0df; /* 크림색 바탕 */
-            --primary-blue: #005088; /* 딥 블루 */
-            --white: #ffffff;
-        }
-
         body {
-            margin: 0; padding: 0;
-            background-color: var(--bg-color);
-            font-family: 'Noto Sans KR', sans-serif;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; overflow: hidden;
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-
-        /* 1280x720 슬라이드 규격 스타일 */
-        .portal-container {
-            width: 1280px; height: 720px;
-            background: var(--white);
+        .menu-container {
+            background: white;
+            padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.1);
-            display: flex; flex-direction: column;
-            padding: 60px; position: relative;
-        }
-
-        /* 제목 스타일 */
-        .header {
-            border-left: 10px solid var(--primary-blue);
-            padding-left: 30px; margin-bottom: 60px;
-        }
-
-        h1 {
-            font-size: 60px; color: var(--primary-blue);
-            margin: 0; letter-spacing: -1px;
-        }
-
-        p.subtitle {
-            font-size: 24px; color: #666; margin-top: 10px;
-        }
-
-        /* 메뉴 버튼 영역 (Tiled Layout) */
-        .menu-grid {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 40px; flex-grow: 1;
-        }
-
-        .menu-card {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 25px;
-            padding: 50px;
-            text-decoration: none;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            transition: all 0.3s ease;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
             text-align: center;
+            max-width: 450px;
+            width: 90%;
         }
-
-        .menu-card:hover {
-            transform: translateY(-10px);
-            background: var(--primary-blue);
-            border-color: var(--primary-blue);
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
         }
-
-        .menu-card i {
-            font-size: 80px; color: var(--primary-blue);
+        p {
+            color: #7f8c8d;
             margin-bottom: 30px;
+            font-size: 16px;
         }
-
-        .menu-card h2 {
-            font-size: 36px; color: #334155; margin: 0;
+        .btn {
+            display: block;
+            background: #3498db;
+            color: white;
+            padding: 16px;
+            margin: 15px 0;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
         }
-
-        .menu-card p {
-            font-size: 20px; color: #64748b; margin-top: 15px;
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
         }
-
-        /* 마우스 올렸을 때 텍스트 색상 변경 */
-        .menu-card:hover i,
-        .menu-card:hover h2,
-        .menu-card:hover p {
-            color: var(--white);
-        }
-
-        .footer {
-            margin-top: 40px; text-align: right;
-            font-size: 18px; color: #94a3b8;
-        }
+        /* 각 버튼별 포인트 색상 */
+        .btn-game { background: #e67e22; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2); }
+        .btn-game:hover { background: #d35400; box-shadow: 0 6px 12px rgba(211, 84, 0, 0.3); }
+        
+        .btn-puzzle { background: #2ecc71; box-shadow: 0 4px 6px rgba(46, 204, 113, 0.2); }
+        .btn-puzzle:hover { background: #27ae60; box-shadow: 0 6px 12px rgba(39, 174, 96, 0.3); }
     </style>
 </head>
 <body>
 
-    <div class="portal-container">
-        <div class="header">
-            <h1>English Learning Center</h1>
-            <p class="subtitle">오늘의 학습 목표를 선택하세요</p>
-        </div>
-
-        <div class="menu-grid">
-            <a href="voca.html" class="menu-card">
-                <i class="fa-solid fa-book-open-reader"></i>
-                <h2>1. 단어 찾아보기</h2>
-                <p>중2 이상 (고등학교 모의고사 등)<br>핵심 어휘를 집중적으로 학습합니다.</p>
-            </a>
-
-            <a href="bug-game.html" class="menu-card">
-                <i class="fa-solid fa-bug"></i>
-                <h2>2. 단어 게임</h2>
-                <p>나비야 단어줄게 (벌레 게임)<br>집중력과 단어 인지 능력을 키우는 게임!</p>
-            </a>
-        </div>
-
-        <div class="footer">
-            Designed for English Teachers & Students
-        </div>
+    <div class="menu-container">
+        <h1>🗣️ 초등 영어 학습 센터</h1>
+        <p>오늘 공부할 활동을 선택하세요!</p>
+        
+        <a href="voca.html" class="btn">📝 단어장 & 모의고사 복원</a>
+        
+        <a href="bug-game.html" class="btn btn-game">🐛 나비야 단어줄게 게임</a>
+        
+        <a href="word%20puzzle.html" class="btn btn-puzzle">🔠 단어 퍼즐 학습지 제작</a>
     </div>
 
 </body>
 </html>
+
+     
+
+       
