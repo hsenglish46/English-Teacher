@@ -272,9 +272,10 @@
             if (typeof Tesseract !== 'undefined') {
                 try {
                     const imageFile = imageInput.files[0];
-                    // worker 옵션을 최소화하여 CORS/보안 환경 최적화 구조로 호출
+                    // [수정 완료]: corePath와 workerPath를 모두 명시하여 로컬 file:/// 환경 보안 정책 우회
                     const result = await Tesseract.recognize(imageFile, 'eng', {
-                        corePath: 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js-core/4.0.1/tesseract-core.wasm.js'
+                        corePath: 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js-core/4.0.1/tesseract-core.wasm.js',
+                        workerPath: 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/worker.min.js'
                     });
                     const extractedText = result.data.text;
                     
