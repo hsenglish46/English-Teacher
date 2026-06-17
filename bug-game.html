@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flying Word Bug Hunt Pro - Sound Boost Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* [1280x720 고정 규격 및 화면 맞춤 스케일 시스템] */
+        :root {
+            --forest: #1b4332;
+            --lime: #dcfd8b;
+            --orange: #f97316;
+            --white: #ffffff;
+            --slate: #1e293b;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0; padding: 0;
+            background-color: #cbd5e1;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh;
+            font-family: 'Jua', sans-serif;
+            overflow: hidden; /* 여백 제거 및 스크롤바 완전 차단 */
+        }
+
+        /* 게임 본체 래퍼: 이 박스 자체가 모니터 크기에 맞춰 확대됩니다 */
+        .game-wrapper {
+            width: 1280px;
+            height: 720px;
+            position: relative;
+            transform-origin: center center; /* 중앙을 기준으로 확대 */
+            flex-shrink: 0;
+        }
+
+        .slide-container {
+            width: 100%; height: 100%;
+            background-color: var(--white);
+            border-radius: 30px;
+            box-shadow: 0 50px 150px rgba(0,0,0,0.5);
+            position: absolute; top: 0; left: 0;
+            display: none;
+            overflow: hidden;
+        }
+        .slide-container.active { display: flex; flex-direction: column; }
+
+        /* 배경 디자인 */
+        .full-bg {
+            background-size: cover; background-position: center;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative; text-align: center; color: white;
+        }
+        .overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.35); z-index: 0;
+        }
+        .full-bg > * { position: relative; z-index: 1; }
+
+        /* 설정 카드 */
+        .config-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 45px; border-radius: 40px;
+            border: 8px solid var(--forest);
+            width: 900px; color: var(--slate);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+        textarea {
+            width: 100%; height: 100px; font-size: 22px; padding: 15px;
+            border-radius: 15px; border: 3px solid #cbd5e1;
+            font-family: 'Jua'; margin: 15px 0; resize: none;
+        }
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; text-align: left; }
+        select { width: 100%; padding: 12px; font-size: 20px; font-family: 'Jua'; border-radius: 12px; border: 3px solid var(--forest); background: white; cursor: pointer; }
+
+        /* 벌레 객체 */
+        .bug-box { position: absolute; display: flex; align-items: center; z-index: 10; pointer-events: none; }
+        .bug-box img { width: 120px; height: 120px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3)); }
+        .bug-label {
+            background: white; padding: 8px 25px; border-radius: 20px;
+            font-size: 36px; border: 4px solid var(--forest);
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+            color: var(--slate); margin: 0 15px;
+        }
+
+        /* 카운트다운 */
+        .hand-image { height: 400px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .cd-text { font-size: 200px; color: var(--orange); text-shadow: 6px 6px 0 white; margin: 0; }
+
+        /* 결과 화면 */
+        .history-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
+            width: 100%; max-height: 480px; overflow-y: auto;
+            background: rgba(255,255,255,0.9); padding: 30px; border-radius: 25px;
+        }
+        .history-tile { padding: 15px; border-radius: 15px; font-size: 28px; text-align: center; border: 4px solid #eee; }
+        .history-tile.correct { background: #dcfce7; border-color: #22c55e; color: #166534; font-weight: bold; }
+        .history-tile.wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+
+        /* 버튼 */
+        .main-btn {
+            background: var(--forest); color: white; border: none;
+            padding: 22px 70px; font-size: 38px; border-radius: 80px;
+            cursor: pointer; font-family: 'Jua'; transition: all 0.2s;
+            box-shadow: 0 10px 0 #081c15; position: relative; z-index: 100;
+        }
+        .main-btn:active { transform: translateY(4px); box-shadow: 0 5px 0 #081c15; }
+        .btn-accent { background: var(--orange); box-shadow: 0 10px 0 #9a3412; }
+        
+        /* 전체화면용 파란색 버튼 스타일 */
+        .btn-fullscreen { background: #2563eb; box-shadow: 0 10px 0 #1d4ed8; margin-bottom: 20px; }
+
+        /* 텍스트 버블 */
+        .reveal-bubble { font-size: 150px; background: white; padding: 25px 120px; border-radius: 150px; color: var(--forest); border: 12px solid var(--forest); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+        
+        /* 팡! 효과 애니메이션 */
+        @keyframes pop {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-effect { animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    </style>
+</head>
+<body>
+
+<div class="game-wrapper" id="gameWrapper">
+
+    <div class="slide-container active" id="view-intro">
+        <div class="full-bg" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1280&q=80');">
+            <div class="overlay"></div>
+            <h1 style="font-size: 130px; text-shadow: 8px 8px 0 var(--forest); margin: 0;">나비야 단어줄게</h1>
+            <p style="font-size: 40px; margin: 20px 0 40px;">선생님과 함께하는 신나는 단어 찾기!</p>
+            <button class="main-btn btn-fullscreen" onclick="toggleFullscreen()">🖥️ 전체화면으로 보기</button>
+            <button class="main-btn btn-accent" onclick="initApp('view-setup')">게임 시작하기</button>
+        </div>
+    </div>
+
+    <div class="slide-container" id="view-setup">
+        <div class="full-bg" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1280&q=80');">
+            <div class="overlay"></div>
+            <div class="config-card">
+                <h2 style="font-size: 45px; margin: 0 0 15px;">게임 설정</h2>
+                <div style="font-size: 22px; color: #555; text-align: left;">학습할 단어들을 쉼표(,)로 구분해서 넣으세요.</div>
+                <textarea id="words-input">apple, banana, soccer, tennis, forest, flower, school, water</textarea>
+                
+                <div class="config-grid">
+                    <div>
+                        <label style="font-size: 22px;">총 게임 판 수</label>
+                        <select id="rounds-input">
+                            <option value="1">1판 진행</option>
+                            <option value="2">2판 연속</option>
+                            <option value="3">3판 연속</option>
+                            <option value="5">5판 연속</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 22px;">난이도 선택</label>
+                        <select id="diff-input">
+                            <option value="1">🌱 쉬움 (한 방향)</option>
+                            <option value="2">🌿 중간 (좌우 왕복)</option>
+                            <option value="3">🌳 어려움 (상하좌우)</option>
+                            <option value="4">🔥 매운맛 (지그재그/깜빡임)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="main-btn" style="margin-top:40px" onclick="applyConfig()">설정 완료!</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container" id="view-reveal">
+        <div class="full-bg" style="background-image: url('https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1280&q=80');">
+            <div class="overlay"></div>
+            <h2 style="font-size: 70px; margin-bottom: 40px;">이번 판에 찾을 단어!</h2>
+            <div class="reveal-bubble" id="target-reveal-txt">APPLE</div>
+            <p style="font-size: 34px; margin-top: 50px;">눈을 크게 뜨고 <b>10초</b> 동안 찾아보세요!</p>
+            <button class="main-btn btn-accent" onclick="startCountdownSequence()" style="margin-top:45px">준비 됐나요?</button>
+        </div>
+    </div>
+
+    <div class="slide-container" id="view-countdown">
+        <div class="full-bg" style="background-image: url('https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1280&q=80');">
+            <div class="overlay"></div>
+            <img id="hand-img" src="https://cdn-icons-png.flaticon.com/512/1066/1066902.png" class="hand-image">
+            <h1 class="cd-text" id="cd-num-txt">5</h1>
+        </div>
+    </div>
+
+    <div class="slide-container" id="view-game">
+        <div class="full-bg" id="game-canvas" style="position: relative; overflow: hidden; background-image: url('https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1280&q=80');">
+            <div style="position: absolute; top: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 60px; z-index: 100;">
+                <div style="background: white; padding: 15px 50px; border-radius: 60px; font-size: 38px; border: 5px solid var(--forest); color: #333; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+                    찾을 단어: <span id="game-target-label" style="color:var(--forest)">APPLE</span>
+                </div>
+                <div style="background: white; padding: 15px 50px; border-radius: 60px; font-size: 38px; border: 5px solid #ef4444; color: #ef4444; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+                    남은 시간: <span id="game-timer">10</span>초
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container" id="view-result">
+        <div class="full-bg" style="background-image: url('https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1280&q=80');">
+            <div class="overlay"></div>
+            <h2 style="font-size: 70px; margin: 0;">정답은...</h2>
+            <div class="reveal-bubble" id="result-score-box" style="font-size: 190px; padding: 20px 140px;">0</div>
+            <p style="font-size: 45px; margin-top: 40px;">번 나타났습니다!</p>
+            <button class="main-btn btn-accent" onclick="showExplanation()" style="margin-top:40px">왜 정답이 이거예요?</button>
+        </div>
+    </div>
+
+    <div class="slide-container" id="view-explain">
+        <div style="display: flex; flex-direction: column; align-items: center; padding: 60px; height: 100%; background: #f8fafc;">
+            <h2 style="font-size: 50px; margin: 0 0 30px; color: var(--slate);">방금 지나간 벌레들의 단어 장부</h2>
+            <div class="history-grid" id="history-logs"></div>
+            <div style="margin-top: auto;">
+                <button class="main-btn" id="next-btn-text" onclick="handleTransition()">다음 단계로</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container" id="view-finish">
+        <div class="full-bg" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1280&q=80');">
+            <div class="overlay"></div>
+            <h1 style="font-size: 140px; text-shadow: 10px 10px 0 var(--forest);">참 잘했어요!</h1>
+            <p style="font-size: 45px;">오늘의 숲속 공부가 모두 끝났습니다.</p>
+            <button class="main-btn" onclick="location.reload()">처음으로 가기</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- 화면 해상도 자동 맞춤 스케일 엔진 ---
+    function resizeGame() {
+        const wrapper = document.getElementById('gameWrapper');
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        // 1280x720 비율 유지를 위한 스케일 계산
+        const scaleX = windowWidth / 1280;
+        const scaleY = windowHeight / 720;
+        const scale = Math.min(scaleX, scaleY); // 화면 비율이 깨지지 않도록 더 작은 값 채택
+        
+        wrapper.style.transform = `scale(${scale})`;
+    }
+    
+    // 초기 실행 및 창 크기 변경 시 실시간 감지하여 가득 채우기
+    window.addEventListener('resize', resizeGame);
+    window.addEventListener('DOMContentLoaded', resizeGame);
+
+    // --- 에셋 데이터 ---
+    const bugIcons = [
+        'https://cdn-icons-png.flaticon.com/512/1232/1232839.png',
+        'https://cdn-icons-png.flaticon.com/512/802/802336.png',
+        'https://cdn-icons-png.flaticon.com/512/2613/2613788.png',
+        'https://cdn-icons-png.flaticon.com/512/1746/1746694.png',
+        'https://cdn-icons-png.flaticon.com/512/535/535656.png'
+    ];
+    const hands = [
+        'https://cdn-icons-png.flaticon.com/512/1320/1320857.png',
+        'https://cdn-icons-png.flaticon.com/512/1066/1066902.png',
+        'https://cdn-icons-png.flaticon.com/512/2770/2770339.png',
+        'https://cdn-icons-png.flaticon.com/512/1066/1066902.png',
+        'https://cdn-icons-png.flaticon.com/512/1066/1066902.png'
+    ];
+
+    let audio = null;
+    let wordList = [];
+    let roundsTotal = 1;
+    let roundIdx = 1;
+    let diff = 1;
+    let target = "";
+    let correctCount = 0;
+    let logs = [];
+    let isRunning = false;
+
+    // --- 전체화면 제어 함수 ---
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().then(() => {
+                setTimeout(resizeGame, 100); // 전체화면 전환 후 스케일 재계산
+            }).catch(err => {
+                alert(`전체화면 모드를 시작할 수 없습니다: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().then(() => {
+                    setTimeout(resizeGame, 100);
+                });
+            }
+        }
+    }
+
+    // --- 시스템 초기화 ---
+    function initApp(viewId) {
+        if (!audio) {
+            audio = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        changeView(viewId);
+    }
+
+    function changeView(viewId) {
+        document.querySelectorAll('.slide-container').forEach(s => s.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+    }
+
+    function applyConfig() {
+        const val = document.getElementById('words-input').value;
+        wordList = val.split(',').map(w => w.trim()).filter(w => w.length > 0);
+        if (wordList.length === 0) { alert("학습할 단어를 입력하세요!"); return; }
+
+        roundsTotal = parseInt(document.getElementById('rounds-input').value);
+        diff = parseInt(document.getElementById('diff-input').value);
+        roundIdx = 1;
+        setupRound();
+    }
+
+    function setupRound() {
+        target = wordList[Math.floor(Math.random() * wordList.length)];
+        document.getElementById('target-reveal-txt').innerText = target.toUpperCase();
+        document.getElementById('game-target-label').innerText = target.toUpperCase();
+        changeView('view-reveal');
+    }
+
+    // --- 카운트다운 소리 합성 ---
+    function playCountdownTick(isFinal) {
+        if (!audio) return;
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        osc.type = isFinal ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(isFinal ? 880 : 440, audio.currentTime);
+        gain.gain.setValueAtTime(0.1, audio.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.5);
+        osc.connect(gain); gain.connect(audio.destination);
+        osc.start(); osc.stop(audio.currentTime + 0.5);
+    }
+
+    function startCountdownSequence() {
+        changeView('view-countdown');
+        let count = 5;
+        const num = document.getElementById('cd-num-txt');
+        const img = document.getElementById('hand-img');
+        
+        num.innerText = count;
+        img.src = hands[count-1];
+        playCountdownTick(false);
+
+        const timer = setInterval(() => {
+            count--;
+            if (count > 0) {
+                num.innerText = count;
+                img.src = hands[count-1];
+                img.style.transform = "scale(1.3)";
+                setTimeout(() => img.style.transform = "scale(1.0)", 150);
+                playCountdownTick(false);
+            } else {
+                clearInterval(timer);
+                playCountdownTick(true);
+                runGame();
+            }
+        }, 1000);
+    }
+
+    // --- 게임 루프 ---
+    function runGame() {
+        changeView('view-game');
+        const canvas = document.getElementById('game-canvas');
+        const timerTxt = document.getElementById('game-timer');
+        correctCount = 0; logs = [];
+        let time = 10;
+        timerTxt.innerText = time;
+        isRunning = true;
+
+        const clock = setInterval(() => {
+            time--;
+            timerTxt.innerText = time;
+            if (time <= 0) {
+                clearInterval(clock);
+                clearInterval(spawner);
+                isRunning = false;
+                setTimeout(() => {
+                    playBang();
+                    
+                    let confirmedCorrect = 0;
+                    logs.forEach(log => {
+                        if (log.ok) confirmedCorrect++;
+                    });
+                    correctCount = confirmedCorrect;
+
+                    document.getElementById('result-score-box').innerText = correctCount;
+                    document.getElementById('result-score-box').classList.add('pop-effect');
+                    changeView('view-result');
+                }, 1000);
+            }
+        }, 1000);
+
+        const rate = [850, 650, 500, 350][diff - 1];
+        const spawner = setInterval(() => { if (isRunning) createBug(canvas); }, rate);
+    }
+
+    function createBug(cv) {
+        playBuzz();
+        const b = document.createElement('div');
+        b.className = 'bug-box';
+        
+        const isT = Math.random() < 0.45;
+        const w = isT ? target : wordList[Math.floor(Math.random() * wordList.length)];
+        
+        const isCorrectWord = (w.toUpperCase() === target.toUpperCase());
+        if (isCorrectWord) correctCount++;
+        
+        logs.push({ val: w.toUpperCase(), ok: isCorrectWord });
+
+        const icon = bugIcons[Math.floor(Math.random() * bugIcons.length)];
+        b.innerHTML = `<img src="${icon}"><div class="bug-label">${w.toUpperCase()}</div>`;
+        cv.appendChild(b);
+
+        let sx, sy, ex, ey; let dur = [4000, 3200, 2400, 1600][diff - 1];
+
+        if (diff == 1) { sx = -250; ex = 1400; sy = Math.random() * 500 + 100; ey = sy; }
+        else if (diff == 2) { 
+            if (Math.random() > 0.5) { sx = -250; ex = 1400; } else { sx = 1400; ex = -250; b.style.flexDirection = "row-reverse"; }
+            sy = Math.random() * 500 + 100; ey = sy;
+        } else if (diff == 3) { 
+            const d = Math.floor(Math.random() * 4);
+            if (d == 0) { sx = -250; ex = 1400; sy = Math.random() * 600; ey = sy; }
+            else if (d == 1) { sx = 1400; ex = -250; sy = Math.random() * 600; ey = sy; b.style.flexDirection = "row-reverse"; }
+            else if (d == 2) { sx = Math.random() * 1100; ex = sx; sy = -250; ey = 800; b.style.flexDirection = "column"; }
+            else { sx = Math.random() * 1100; ex = sx; sy = 800; ey = -250; b.style.flexDirection = "column-reverse"; }
+        } else {
+            sx = Math.random() > 0.5 ? -250 : 1400; ex = sx > 0 ? -250 : 1400;
+            sy = Math.random() * 600; ey = Math.random() * 600;
+        }
+
+        b.style.left = sx + "px"; b.style.top = sy + "px";
+        let kfs = [ { left: sx+'px', top: sy+'px' }, { left: ex+'px', top: ey+'px' } ];
+        if (diff == 4) {
+            const my = (sy + ey) / 2 + (Math.random() > 0.5 ? 250 : -250);
+            kfs.splice(1, 0, { left: (sx + ex) / 2 + 'px', top: my + 'px', opacity: 0.5 });
+            let f = setInterval(() => { b.style.opacity = b.style.opacity == '0' ? '1' : '0'; }, 120);
+            setTimeout(() => clearInterval(f), dur);
+        }
+        b.animate(kfs, { duration: dur, easing: 'linear' }).onfinish = () => b.remove();
+    }
+
+    function playBang() {
+        if (!audio) return;
+        const osc1 = audio.createOscillator();
+        const gain1 = audio.createGain();
+        osc1.type = 'sawtooth';
+        osc1.frequency.setValueAtTime(100, audio.currentTime);
+        osc1.frequency.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.5);
+        gain1.gain.setValueAtTime(0.2, audio.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.5);
+        osc1.connect(gain1); gain1.connect(audio.destination);
+        osc1.start(); osc1.stop(audio.currentTime + 0.5);
+
+        [523.25, 659.25, 783.99].forEach(freq => {
+            const osc = audio.createOscillator();
+            const gain = audio.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, audio.currentTime);
+            gain.gain.setValueAtTime(0.1, audio.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 1);
+            osc.connect(gain); gain.connect(audio.destination);
+            osc.start(); osc.stop(audio.currentTime + 1);
+        });
+    }
+
+    function playBuzz() {
+        if (!audio) return;
+        const o = audio.createOscillator(); const g = audio.createGain();
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(110 + Math.random() * 80, audio.currentTime);
+        g.gain.setValueAtTime(0.04, audio.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.35);
+        o.connect(g); g.connect(audio.destination);
+        o.start(); o.stop(audio.currentTime + 0.35);
+    }
+
+    function showExplanation() {
+        changeView('view-explain');
+        const cont = document.getElementById('history-logs');
+        cont.innerHTML = "";
+        logs.forEach(log => {
+            const d = document.createElement('div');
+            d.className = `history-tile ${log.ok ? 'correct' : 'wrong'}`;
+            d.innerText = log.val + (log.ok ? " (정답)" : "");
+            cont.appendChild(d);
+        });
+        const btn = document.getElementById('next-btn-text');
+        if (roundIdx < roundsTotal) { btn.innerText = "다음 라운드 시작"; btn.className = "main-btn btn-accent"; }
+        else { btn.innerText = "전체 종료"; btn.className = "main-btn"; }
+    }
+
+    // 창 크기 변경 시 스케일러 재실행 트리거
+    function handleTransition() {
+        document.getElementById('result-score-box').classList.remove('pop-effect');
+        if (roundIdx < roundsTotal) { roundIdx++; setupRound(); setTimeout(resizeGame, 50); }
+        else { changeView('view-finish'); setTimeout(resizeGame, 50); }
+    }
+</script>
+</body>
+</html>
