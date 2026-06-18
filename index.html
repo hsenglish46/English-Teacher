@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Learning Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --accent-color: #0284c7;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            font-family: 'Nanum Gothic', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+        }
+
+        /* 헤더 영역 */
+        .header-container {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header-container h1 {
+            font-size: 56px;
+            font-weight: 800;
+            color: #0369a1;
+            margin: 0 0 10px 0;
+            letter-spacing: -1px;
+        }
+
+        .header-container p {
+            font-size: 22px;
+            color: #475569;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* 메인 3대 분류 컨테이너 */
+        .main-grid {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 1240px;
+            padding: 0 20px;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        /* 대분류 섹션 카드 */
+        .category-section {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 40px 30px;
+            flex: 1;
+            max-width: 380px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+            border: 1px solid rgba(255,255,255,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .category-section:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.12);
+        }
+
+        /* 대분류 제목 */
+        .category-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0 0 12px 0;
+            padding-bottom: 12px;
+            width: 100%;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        /* 대분류 서브 설명 응원문구 */
+        .category-subtitle {
+            font-size: 14px;
+            color: #22c55e;
+            font-weight: 700;
+            margin-bottom: 25px;
+            min-height: 40px;
+            line-height: 1.4;
+        }
+
+        /* 버튼들을 담는 그룹 */
+        .sub-links-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: auto;
+        }
+
+        /* 개별 연결 링크 버튼 스타일 */
+        .menu-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 20px 15px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #334155;
+            transition: all 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: #f0f9ff;
+            border-color: #38bdf8;
+            color: #0369a1;
+        }
+
+        .btn-emoji {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .btn-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .btn-desc {
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        
+        .menu-btn:hover .btn-desc {
+            color: #6ba4c9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1>English Learning Center</h1>
+        <p>오늘도 화이팅~ 😊</p>
+    </div>
+
+    <div class="main-grid">
+
+        <div class="category-section">
+            <div class="category-title">📖 공부해볼까요?</div>
+            <div class="category-subtitle">오늘도 열심히 하는 당신 멋져요~ 화이팅!</div>
+            
+            <div class="sub-links-group">
+                <a href="voca.html" class="menu-btn">
+                    <span class="btn-emoji">🔍</span>
+                    <span class="btn-title">단어 찾아보기</span>
+                    <span class="btn-desc">(중2 이상 단어 검색됨)</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="category-section">
+            <div class="category-title">🎮 학습 게임</div>
+            <div class="category-subtitle">게임을 통해 단어를 재밌고 완벽하게 마스터해요!</div>
+            
+            <div class="sub-links-group">
+                <a href="bug-game.html" class="menu-btn">
+                    <span class="btn-emoji">🦋</span>
+                    <span class="btn-title">단어게임</span>
+                    <span class="btn-desc">(나비야 단어줄게 벌레 게임)</span>
+                </a>
+                
+                <a href="Word-wheel.html" class="menu-btn">
+                    <span class="btn-emoji">🎡</span>
+                    <span class="btn-title">돌려돌려 단어</span>
+                    <span class="btn-desc">(Word-wheel 단어 읽기)</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="category-section">
+            <div class="category-title">📝 학습지 제작</div>
+            <div class="category-subtitle">선생님과 학생을 위한 맞춤형 단어 학습지 인쇄</div>
+            
+            <div class="sub-links-group">
+                <a href="word-puzzle.html" class="menu-btn">
+                    <span class="btn-emoji">🧩</span>
+                    <span class="btn-title">단어 퍼즐 제작</span>
+                    <span class="btn-desc">초3부터 성인 수준까지 퍼즐 인쇄</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
